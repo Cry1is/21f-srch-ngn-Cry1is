@@ -32,9 +32,11 @@ public:
     string getID();
     string getTitle();
     string getText();
+    double getFreq(string word);
+    double TF_IDF(string, vecotr<string>&, unordered_map<string, Document>&);
 
     int wordCount(string);
-    void stemWord(string&);
+    static void stemWord(string&);
 };
 
 #endif //INC_21F_SRCH_NGN_DOCUMENT_H

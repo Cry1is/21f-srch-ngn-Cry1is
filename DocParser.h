@@ -28,13 +28,16 @@ private:
     int max;
     AVLTree<string, vector<string>> tree;
     unordered_map<string, int> wordList;
-    set<Document> docs;
+    unordered_map<string, Document> docs;
 public:
     DocParser();
     DocParser(string, int);
 
     void getFiles();
-    void parseFile(string);
+    int parseFile(string);
+
+    AVLTree<string, vector<string>>& getTree();
+    unordered_map<string, Document>& getDocs();
 };
 
 #endif //INC_21F_SRCH_NGN_CRY1IS_DOCPARSER_H

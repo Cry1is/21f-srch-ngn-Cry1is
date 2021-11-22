@@ -1,6 +1,8 @@
 #include <iostream>
 #include <chrono>
+
 #include "DocParser.h"
+#include "QueryProcessor.h"
 
 using namespace std;
 
@@ -9,7 +11,7 @@ int main(int argc, char** argv) {
         cout << "Please provide a directory" << endl;
     else {
         int max = 0;
-        cout << "How many files would you like to parse?: ";
+        cout << "How many files would you like to parse?: " << endl;
         cin >> max;
 
         chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
@@ -22,6 +24,12 @@ int main(int argc, char** argv) {
         chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
 
         cout << "It took me " << time_span.count() << " seconds." << endl;
+
+        QueryProcessor q;
+        string word;
+        cout << "Search for a word (1 to exit): " << endl;
+        cin >> word;
+        q.search(word, d.getTree(), d.getDocs());
     }
     return 0;
 }

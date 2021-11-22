@@ -24,24 +24,24 @@ struct Node {
     Node(K& first, V& second) {
         this->first = first;
         this->second = second;
-        height = 0;
+        height = 1;
         parent = left = right = nullptr;
     }
 
     void setLeft(Node<K,V>* left) {
+        if (this == left)
+            return;
         this->left = left;
-        if (left) {
+        if (left)
             left->parent = this;
-            this->height = max(this->height, left->height + 1);
-        }
     }
 
     void setRight(Node<K,V>* right) {
+        if (this == right)
+            return;
         this->right = right;
-        if (right) {
+        if (right)
             right->parent = this;
-            this->height = max(this->height, right->height + 1);
-        }
     }
 
     friend class AVLTree<K,V>;
@@ -60,6 +60,7 @@ private:
     void RR(Node<K,V>*);
     void RL(Node<K,V>*);
     int height(Node<K,V>*);
+    void updateHeight(Node<K,V>*);
     void replace(Node<K,V>*);
     Node<K,V>* look(K&, Node<K,V>*);
     void out(ostream&,Node<K,V>*,int) const;
@@ -89,6 +90,7 @@ AVLTree<K,V>::AVLTree() {
 
 template<class K, class V>
 AVLTree<K,V>::AVLTree(const AVLTree<K,V>& other) {
+    head = new Node<K, V>(other->first, other->second);
     copy(head, other.head);
 }
 
@@ -100,7 +102,9 @@ AVLTree<K,V>::~AVLTree() {
 template<class K, class V>
 AVLTree<K,V>& AVLTree<K,V>::operator=(const AVLTree<K,V>& other) {
     clear();
+    head = new Node<K, V>(other->first, other->second);
     copy(head, other.head);
+    return *this;
 }
 
 template<class K, class V>
@@ -132,6 +136,7 @@ V& AVLTree<K,V>::insert(K& key, V& val) {
         else
             return temp->second;
     }
+    updateHeight(temp);
     balance(temp);
     return temp->second;
 }
@@ -154,16 +159,21 @@ ostream& operator<<(ostream& fout, const AVLTree<K,V>& tree) {
 
 template<class K, class V>
 void AVLTree<K,V>::copy(Node<K,V>* node, Node<K,V>* other) {
+    updateHeight(node);
     if (!node && other)
         node = new Node<K, V>(other->first, other->second);
     if (other->left) {
         node->setLeft(new Node<K, V>(other->left->first, other->left->second));
         copy(node->left,other->left);
     }
+    else
+        updateHeight(node);
     if (other->right) {
         node->setRight(new Node<K, V>(other->right->first, other->right->second));
         copy(node->right,other->right);
     }
+    else
+        updateHeight(node);
 }
 
 template<class K, class V>
@@ -183,18 +193,19 @@ void AVLTree<K,V>::balance(Node<K,V>* val) {
     int right = height(val->right);
     if (abs(left - right) < 2)
         balance(val->parent);
-    else if (left - right == 2) {
+    else if (left - right >= 2) {
         if (height(val->left->left) > height(val->left->right))
             LL(val);
         else
             LR(val);
     }
-    else if (right - left == 2) {
+    else if (right - left >= 2) {
         if (height(val->right->right) > height(val->right->left))
             RR(val);
         else
             RL(val);
     }
+    updateHeight(val);
 }
 
 template<class K, class V>
@@ -221,7 +232,7 @@ void AVLTree<K,V>::LL(Node<K,V>* val) {
     else {
         head = k1;
         k1->parent = nullptr;
-        k1->height = max(height(k1->left), height(k1->right));
+        k1->height = max(height(k1->left), height(k1->right)) + 1;
     }
 }
 
@@ -255,7 +266,7 @@ void AVLTree<K,V>::RR(Node<K,V>* val) {
     else {
         head = k1;
         k1->parent = nullptr;
-        k1->height = max(height(k1->left), height(k1->right));
+        k1->height = max(height(k1->left), height(k1->right)) + 1;
     }
 }
 
@@ -268,6 +279,14 @@ void AVLTree<K,V>::RL(Node<K,V>* val) {
 template<class K, class V>
 int AVLTree<K,V>::height(Node<K,V>* val) {
     return (val) ? val->height : 0;
+}
+
+template <class K, class V>
+void AVLTree<K,V>::updateHeight(Node<K,V>* node) {
+    if (node) {
+        node->height = max((node->left) ? node->left->height + 1 : 1, (node->right) ? node->right->height + 1 : 1);
+        updateHeight(node->parent);
+    }
 }
 
 template<class K, class V>
