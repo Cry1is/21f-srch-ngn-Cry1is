@@ -33,7 +33,7 @@ public:
     string getTitle();
     string getText();
     double getFreq(string word);
-    double TF_IDF(string, vecotr<string>&, unordered_map<string, Document>&);
+    double TF_IDF(string, vector<string>&, unordered_map<string, Document>&);
 
     int wordCount(string);
     static void stemWord(string&);

@@ -23,13 +23,11 @@ int main(int argc, char** argv) {
 
         chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
 
-        cout << "It took me " << time_span.count() << " seconds." << endl;
+        cout << "Total took me " << time_span.count() << " seconds." << endl;
+        d.printTimes();
 
         QueryProcessor q;
-        string word;
-        cout << "Search for a word (1 to exit): " << endl;
-        cin >> word;
-        q.search(word, d.getTree(), d.getDocs());
+        q.UI(d.getTree(), d.getDocs());
     }
     return 0;
 }

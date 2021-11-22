@@ -182,6 +182,8 @@ void AVLTree<K,V>::destruct(Node<K,V>* node) {
         return;
     destruct(node->left);
     destruct(node->right);
+    node->setLeft(nullptr);
+    node->setRight(nullptr);
     delete node;
 }
 

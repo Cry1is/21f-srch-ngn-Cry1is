@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <set>
+#include <chrono>
 
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/istreamwrapper.h"
@@ -29,6 +30,8 @@ private:
     AVLTree<string, vector<string>> tree;
     unordered_map<string, int> wordList;
     unordered_map<string, Document> docs;
+
+    chrono::duration<double> direntTime, ifstreamTime, jsonParseTime, addTextTime, seekgTime;
 public:
     DocParser();
     DocParser(string, int);
@@ -38,6 +41,8 @@ public:
 
     AVLTree<string, vector<string>>& getTree();
     unordered_map<string, Document>& getDocs();
+
+    void printTimes();
 };
 
 #endif //INC_21F_SRCH_NGN_CRY1IS_DOCPARSER_H
