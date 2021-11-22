@@ -80,20 +80,20 @@ int DocParser::parseFile(string filePath) {
     // initialize the document object
     rapidjson::Document doc;
 
+    chrono::high_resolution_clock::time_point t3 = chrono::high_resolution_clock::now();
     // open the file
     ifstream file(filePath);
+    chrono::high_resolution_clock::time_point t4 = chrono::high_resolution_clock::now();
+    seekgTime = seekgTime + chrono::duration_cast<chrono::duration<double>>(t4 - t3);
 
-    if (!file.is_open())
-        throw logic_error("file " + filePath + " did not open");
+    /*if (!file.is_open())
+        throw logic_error("file " + filePath + " did not open");*/
     // read the file into a char array
     stringstream ss;
 
-    chrono::high_resolution_clock::time_point t3 = chrono::high_resolution_clock::now();
     file.seekg(0, ios::end);
     int length = file.tellg();
     file.seekg(0, ios::beg);
-    chrono::high_resolution_clock::time_point t4 = chrono::high_resolution_clock::now();
-    seekgTime = seekgTime + chrono::duration_cast<chrono::duration<double>>(t4 - t3);
 
     char* temp = new char[length + 1];
     while (file.getline(temp, length + 1, '\n')) {
@@ -129,4 +129,5 @@ void DocParser::printTimes() {
     cout << "ifstream took me " << this->ifstreamTime.count() << " seconds." << endl;
     cout << "json took me " << this->jsonParseTime.count() << " seconds." << endl;
     cout << "addText took me " << this->addTextTime.count() << " seconds." << endl;
+    cout << "seekg took me " << this->seekgTime.count() << " seconds." << endl;
 }
