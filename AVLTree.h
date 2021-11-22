@@ -18,11 +18,30 @@ template<class K, class V>
 struct Node {
     K first;
     V second;
+    int height;
     Node<K,V>* parent,* left,* right;
+
     Node(K& first, V& second) {
         this->first = first;
         this->second = second;
+        height = 0;
         parent = left = right = nullptr;
+    }
+
+    void setLeft(Node<K,V>* left) {
+        this->left = left;
+        if (left) {
+            left->parent = this;
+            this->height = max(this->height, left->height + 1);
+        }
+    }
+
+    void setRight(Node<K,V>* right) {
+        this->right = right;
+        if (right) {
+            right->parent = this;
+            this->height = max(this->height, right->height + 1);
+        }
     }
 
     friend class AVLTree<K,V>;
@@ -100,18 +119,14 @@ V& AVLTree<K,V>::insert(K& key, V& val) {
     while (!exit) {
         if (key < temp->first) {
             exit = !temp->left;
-            if (exit) {
-                temp->left = new Node<K, V>(key, val);
-                temp->left->parent = temp;
-            }
+            if (exit)
+                temp->setLeft(new Node<K, V>(key, val));
             temp = (temp->left) ? temp->left : temp;
         }
         else if (key > temp->first) {
             exit = !temp->right;
-            if (exit) {
-                temp->right = new Node<K, V>(key, val);
-                temp->right->parent = temp;
-            }
+            if (exit)
+                temp->setRight(new Node<K, V>(key, val));
             temp = (temp->right) ? temp->right : temp;
         }
         else
@@ -142,13 +157,11 @@ void AVLTree<K,V>::copy(Node<K,V>* node, Node<K,V>* other) {
     if (!node && other)
         node = new Node<K, V>(other->first, other->second);
     if (other->left) {
-        node->left = new Node<K, V>(other->left->first, other->left->second);
-        node->left->parent = node;
+        node->setLeft(new Node<K, V>(other->left->first, other->left->second));
         copy(node->left,other->left);
     }
     if (other->right) {
-        node->right = new Node<K, V>(other->right->first, other->right->second);
-        node->right->parent = node;
+        node->setRight(new Node<K, V>(other->right->first, other->right->second));
         copy(node->right,other->right);
     }
 }
@@ -196,22 +209,19 @@ void AVLTree<K,V>::LL(Node<K,V>* val) {
     Node<K,V>* k1 = val->left;
     Node<K,V>* k3 = k1->right;
 
-    k1->right = val;
-    val->parent = k1;
-    val->left = k3;
-    if (k3)
-        k3->parent = val;
+    k1->setRight(val);
+    val->setLeft(k3);
 
     if (par) {
         if (isLeft)
-            par->left = k1;
+            par->setLeft(k1);
         else
-            par->right = k1;
-        k1->parent = par;
+            par->setRight(k1);
     }
     else {
         head = k1;
         k1->parent = nullptr;
+        k1->height = max(height(k1->left), height(k1->right));
     }
 }
 
@@ -233,22 +243,19 @@ void AVLTree<K,V>::RR(Node<K,V>* val) {
     Node<K,V>* k1 = val->right;
     Node<K,V>* k3 = k1->left;
 
-    k1->left = val;
-    val->parent = k1;
-    val->right = k3;
-    if (k3)
-        k3->parent = val;
+    k1->setLeft(val);
+    val->setRight(k3);
 
     if (par) {
         if (isLeft)
-            par->left = k1;
+            par->setLeft(k1);
         else
-            par->right = k1;
-        k1->parent = par;
+            par->setRight(k1);
     }
     else {
         head = k1;
         k1->parent = nullptr;
+        k1->height = max(height(k1->left), height(k1->right));
     }
 }
 
@@ -260,9 +267,7 @@ void AVLTree<K,V>::RL(Node<K,V>* val) {
 
 template<class K, class V>
 int AVLTree<K,V>::height(Node<K,V>* val) {
-    if (!val)
-        return 0;
-    return 1 + max(height(val->left),height(val->right));
+    return (val) ? val->height : 0;
 }
 
 template<class K, class V>
@@ -289,14 +294,10 @@ void AVLTree<K,V>::replace(Node<K,V>* val) {
             return;
         }
 
-        if (isLeft) {
-            par->left = val;
-            val->parent = par;
-        }
-        else {
-            par->right = val;
-            val->parent = par;
-        }
+        if (isLeft)
+            par->setLeft(val);
+        else
+            par->setRight(val);
 
         balance(val);
         delete cur;
@@ -307,34 +308,27 @@ void AVLTree<K,V>::replace(Node<K,V>* val) {
         while (val->right) {
             val = val->right;
         }
-        val->parent->right = val->left;
-        if (val->left)
-            val->left->parent = val->parent;
+        val->parent->setRight(val->left);
     } else {
         while (val->left) {
             val = val->left;
         }
-        val->parent->left = val->right;
-        if (val->right)
-            val->right->parent = val->parent;
+        val->parent->setLeft(val->right);
     }
     if (par) {
         if (isLeft)
-            par->left = val;
+            par->setLeft(val);
         else
-            par->right = val;
-        val->parent = par;
+            par->setRight(val);
     }
     else {
         head = val;
+        val->height = 0;
         val->parent = nullptr;
+        val->updateHeight(val);
     }
-    val->left = cur->left;
-    val->right = cur->right;
-    if (cur->left)
-        cur->left->parent = val;
-    if (cur->right)
-        cur->right->parent = val;
+    val->setLeft(cur->left);
+    val->setRight(cur->right);
     balance(val);
     delete cur;
 }
