@@ -12,7 +12,7 @@ void QueryProcessor::search(string word, AVLTree<string, vector<string>>& tree, 
     cout << "Word: " << word << endl;
     stemWord(word);
     if (tree.find(word)) {
-        vector<string> temp = sort(tree.find(word)->second);
+        vector<string> temp = tree.find(word)->second;
         for (int i = 0; i < temp.size(); i++) {
             Document doc = docs.find(temp[i])->second;
             cout << doc.TF_IDF(word, temp, docs) << ": " << doc.getTitle() << endl;
